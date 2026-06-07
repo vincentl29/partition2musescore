@@ -1,0 +1,24 @@
+# Artefact créé automatiquement par un plugin MCP en arrière-plan (RAG/mémoire vectorielle) — sans rapport avec le code.
+ruvector.db
+
+# État runtime de Claude Code (verrous de tâches planifiées, etc.)
+.claude/
+
+# Éditeurs / IDE
+.idea/
+*.iml
+
+# Dossiers de travail : partitions personnelles (souvent protégées par le droit d'auteur) — ne pas committer leur contenu.
+/partitions-sources/*
+/partitions-convertis/*
+!/partitions-sources/.gitkeep
+!/partitions-convertis/.gitkeep
+
+# Python (si la pile retenue est Python — à ajuster sinon)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
