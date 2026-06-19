@@ -5,3 +5,7 @@ AGENTS.md
 *.iml
 scripts/
 memory/
+
+# Documentation tierce (Audiveris) recopiée pour référence locale — pas republiée.
+Audiveris_Handbook/
+Audiveris_Handbook_EN/

@@ -14,11 +14,8 @@ ruvector.db
 !/partitions-sources/.gitkeep
 !/partitions-convertis/.gitkeep
 
-# Python (si la pile retenue est Python — à ajuster sinon)
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-*.egg-info/
-.pytest_cache/
-.ruff_cache/
+# .NET / C# (build local, jamais committé)
+bin/
+obj/
+*.user
+.vs/
