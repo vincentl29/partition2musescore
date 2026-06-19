@@ -10,11 +10,27 @@ La langue de travail du projet est le **français** (issues, PR, commits).
 
 ## État du projet
 
-Le projet est encore au stade de l'amorçage : le pipeline de conversion
-(image/PDF → reconnaissance optique de musique → fichier MuseScore) n'est pas
-encore implémenté. La section *Lancer le projet / Tests et qualité* ci-dessous
-sera complétée dès qu'un manifeste de paquet (ex. `pyproject.toml`) existera —
-voir `CLAUDE.md` pour l'état courant et les choix d'architecture déjà actés.
+Application desktop **C#/.NET 10 (WPF)** — solution `Partition2MuseScore.slnx`,
+code dans `src/Partition2MuseScore/`. Le pipeline de conversion (image/PDF →
+Audiveris → fusion MusicXML → MuseScore 4 CLI → `.mscz`) est implémenté dans
+`MainWindow.xaml.cs` ; voir `CLAUDE.md` pour le détail de ce qui est fait.
+
+## Lancer le projet
+
+```powershell
+dotnet build Partition2MuseScore.slnx     # compiler
+dotnet run --project src/Partition2MuseScore   # lancer l'appli
+```
+
+Nécessite le SDK .NET 10 et Windows (WPF). Pour une conversion réelle,
+Audiveris et MuseScore 4 doivent être installés (détectés via le registre
+Windows, indépendamment du lecteur d'installation).
+
+## Tests et qualité
+
+Pas encore de projet de tests ni d'analyseurs configurés au-delà des
+diagnostics par défaut du SDK — `dotnet build` sans avertissement est pour
+l'instant le seul filet de sécurité avant une PR.
 
 ## Conventions de commit
 
@@ -31,7 +47,7 @@ refactor: …      test: …      chore: …
 ## Pull requests
 
 1. Créer une branche dédiée depuis la branche par défaut.
-2. Tests et lint verts (une fois le projet outillé — voir `CLAUDE.md`).
+2. `dotnet build Partition2MuseScore.slnx` sans avertissement (voir *Tests et qualité*).
 3. Si l'architecture change, **mettre à jour `CLAUDE.md` et `README.md`** en conséquence.
 4. Ajouter une entrée sous `## [Unreleased]` dans `CHANGELOG.md`.
 5. Décrire le *pourquoi* du changement dans la PR.
@@ -42,7 +58,8 @@ refactor: …      test: …      chore: …
   seulement quoi — documenter les pièges et décisions non évidentes (ex. choix
   d'un moteur OMR, gestion de versions du format MuseScore…).
 - Privilégier les fonctions pures et testables ; isoler les effets de bord
-  (I/O fichier, modèles ML) dans des modules dédiés.
+  (I/O fichier, appels aux outils externes Audiveris/MuseScore 4) dans des
+  méthodes dédiées plutôt que les mêler à la logique de fusion/parsing.
 
 ## Repères d'architecture
 

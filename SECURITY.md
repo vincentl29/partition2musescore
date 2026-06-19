@@ -35,36 +35,47 @@ seront traités au mieux, sans engagement de délai.
 
 ## Périmètre
 
-partition2musescore convertit des fichiers fournis par l'utilisateur (images
-scannées, PDF de partitions) en fichiers MuseScore (`.mscz`/`.mscx`), via un
-moteur de reconnaissance optique de musique (OMR) et potentiellement des modèles
-téléchargés depuis des sources tierces. Les vecteurs d'attaque les plus
-pertinents sont les suivants.
+partition2musescore est une application desktop **C#/.NET (WPF)** qui convertit
+des fichiers fournis par l'utilisateur (images scannées, PDF de partitions) en
+fichiers MuseScore (`.mscz`), en pilotant deux outils externes déjà installés
+sur la machine : **Audiveris** (reconnaissance optique de musique) et
+**MuseScore 4** (export final), tous deux invoqués via `System.Diagnostics.Process`.
+Le projet lui-même n'embarque aucune dépendance NuGet à ce jour ; les vecteurs
+d'attaque les plus pertinents sont les suivants.
 
 **Fichiers d'entrée malveillants** : une image ou un PDF spécialement conçu
-pourrait exploiter une vulnérabilité dans les bibliothèques de décodage
-d'image/PDF ou dans le moteur OMR. Ne traitez pas de fichiers provenant de
-sources non fiables sans précautions.
+pourrait exploiter une vulnérabilité dans Audiveris (décodage d'image/PDF,
+OCR Tesseract) plutôt que dans le code de partition2musescore lui-même — le
+fichier ne passe jamais par un parseur d'image/PDF en mémoire dans l'appli.
+Ne traitez pas de fichiers provenant de sources non fiables sans précautions
+(bac à sable, VM).
 
-**Intégrité des modèles téléchargés** : si le moteur OMR repose sur des modèles
-de machine learning téléchargés au premier lancement (HuggingFace ou autre),
-aucune vérification cryptographique de leur intégrité n'est garantie par le
-projet ; vous dépendez de la sécurité de la chaîne d'approvisionnement amont.
+**Outils externes locaux** : Audiveris et MuseScore 4 ne sont pas embarqués ni
+téléchargés par partition2musescore — l'appli se contente de les localiser via
+le registre Windows (clé `Uninstall`, `InstallLocation`) puis de les lancer.
+Un de ces deux outils compromis ou trafiqué sur la machine de l'utilisateur
+s'exécutera avec les mêmes privilèges que l'appli ; partition2musescore ne
+vérifie pas leur intégrité (signature, somme de contrôle) avant de les lancer.
 
-**Exécution de code via les dépendances** : le projet s'appuie sur des
-bibliothèques de traitement d'image/PDF et potentiellement des frameworks de
-ML lourds. Une dépendance compromise ou mal épinglée pourrait introduire du
-code malveillant lors de l'installation des dépendances.
+**Construction de la ligne de commande** : les chemins de fichiers
+(source, dossier de travail temporaire, destination) sont actuellement
+insérés par interpolation de chaîne dans les arguments passés à
+`Audiveris.exe`/`MuseScore4.exe`, entourés de guillemets. Un chemin contenant
+lui-même un caractère `"` pourrait théoriquement rompre ce guillemetage et
+injecter un argument supplémentaire dans la ligne de commande de l'outil
+externe. Une migration vers `ProcessStartInfo.ArgumentList` (qui échappe
+chaque argument indépendamment) éliminerait ce risque.
 
-**Chemins de sortie** : les noms de fichiers d'entrée influencent les noms des
-fichiers `.mscz`/`.mscx` générés. Un nom de fichier contenant des séquences de
-traversée de répertoire (ex. `../`) pourrait écrire hors du répertoire de
-sortie prévu si l'entrée n'est pas correctement assainie.
+**Chemins de sortie** : le chemin de destination est choisi par l'utilisateur
+via un sélecteur de fichier natif (pas de saisie libre arbitraire d'un nom
+puis concaténation), ce qui limite le risque de traversée de répertoire
+(`../`) — mais toute évolution qui réintroduirait une concaténation de chemin
+à partir d'une chaîne non validée devrait être examinée avec attention.
 
-**Fichiers `.mscz`/`.mscx` générés** : ce sont des archives zip contenant du
-XML. Une génération incorrecte ou une dépendance à un outil tiers pour
-l'assemblage final (ex. appel à MuseScore en ligne de commande) doit éviter
-toute injection de commande basée sur des noms/chemins fournis par l'utilisateur.
+**Fichiers `.mscz` générés** : ce sont des archives zip contenant du XML,
+produites entièrement par `MuseScore4.exe` — partition2musescore ne génère
+lui-même que le MusicXML intermédiaire (fusion des mouvements détectés par
+Audiveris), jamais directement le zip `.mscz`.
 
 ## Bonnes pratiques recommandées
 

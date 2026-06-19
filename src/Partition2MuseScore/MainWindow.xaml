@@ -5,8 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Partition2MuseScore"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Partition2MuseScore" Height="240" Width="650">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
 
+        <Label Grid.Row="0" Grid.Column="0" Content="Fichier source (PDF/image) :" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="InputPathTextBox" Margin="6,4" VerticalContentAlignment="Center" TextChanged="InputPathTextBox_TextChanged"/>
+        <Button Grid.Row="0" Grid.Column="2" Content="Parcourir..." Padding="8,2" Click="BrowseInput_Click"/>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="Fichier de sortie (.mscz) :" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="1" x:Name="OutputPathTextBox" Margin="6,4" VerticalContentAlignment="Center"/>
+        <Button Grid.Row="1" Grid.Column="2" Content="Parcourir..." Padding="8,2" Click="BrowseOutput_Click"/>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,16,0,0" VerticalAlignment="Center">
+            <Button x:Name="ConvertButton" Content="Convertir la partition" Padding="10,4" Click="Convert_Click"/>
+            <StackPanel x:Name="ProgressPanel" Orientation="Vertical" Margin="12,0,0,0" VerticalAlignment="Center" Visibility="Collapsed">
+                <ProgressBar x:Name="ConversionProgressBar" Minimum="0" Maximum="100" Width="240" Height="18"/>
+                <TextBlock x:Name="ConversionStatusText" Margin="0,4,0,0" FontSize="11"/>
+            </StackPanel>
+            <Button x:Name="OpenFolderButton" Content="Ouvrir le dossier de destination" Padding="10,4" Margin="12,0,0,0" Visibility="Collapsed" Click="OpenFolder_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
