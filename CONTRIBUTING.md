@@ -11,9 +11,11 @@ La langue de travail du projet est le **français** (issues, PR, commits).
 ## État du projet
 
 Application desktop **C#/.NET 10 (WPF)** — solution `Partition2MuseScore.slnx`,
-code dans `src/Partition2MuseScore/`. Le pipeline de conversion (image/PDF →
-Audiveris → fusion MusicXML → MuseScore 4 CLI → `.mscz`) est implémenté dans
-`MainWindow.xaml.cs` ; voir `CLAUDE.md` pour le détail de ce qui est fait.
+code dans `src/Partition2MuseScore/`. `MainWindow.xaml.cs` ne contient que les
+handlers UI ; le pipeline de conversion (image/PDF → Audiveris → fusion
+MusicXML → MuseScore 4 CLI → `.mscz`) est implémenté dans des classes dédiées
+(`ScoreConverter`, `MusicXmlMerger`, `ToolLocator`, `ToolVersionChecker`,
+`ProcessRunner`) ; voir `CLAUDE.md` pour le détail de ce qui est fait.
 
 ## Lancer le projet
 
@@ -24,7 +26,18 @@ dotnet run --project src/Partition2MuseScore   # lancer l'appli
 
 Nécessite le SDK .NET 10 et Windows (WPF). Pour une conversion réelle,
 Audiveris et MuseScore 4 doivent être installés (détectés via le registre
-Windows, indépendamment du lecteur d'installation).
+Windows, indépendamment du lecteur d'installation) ; l'appli les installe
+elle-même via `winget` au premier lancement si l'un des deux est absent.
+
+Pour générer l'installateur Windows (`Setup.msi`) :
+
+```powershell
+pwsh scripts/build-installer.ps1
+```
+
+Nécessite en plus le CLI WiX v5 (`dotnet tool install --global wix --version 5.0.2`
+— pas v6/v7, voir `CLAUDE.md`). Voir [`CLAUDE.md`](CLAUDE.md), section
+« Installateur Windows (Setup.msi) », pour le détail.
 
 ## Tests et qualité
 

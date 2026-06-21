@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Source WiX (v5, syntaxe simplifiée — pas de UpgradeCode/Version en dur ici à part
+  UpgradeCode qui doit rester fixe à vie pour que les mises à jour MajorUpgrade fonctionnent).
+  AppVersion et PublishDir sont passés en -d par scripts/build-installer.ps1.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Partition2MuseScore"
+            Manufacturer="Vincent L."
+            Version="$(var.AppVersion)"
+            UpgradeCode="89db4a76-8ac8-4f9f-b1e6-5496cea47d15"
+            ProductCode="*"
+            Language="1033"
+            Scope="perMachine">
+
+    <SummaryInformation Description="Convertit une partition (image/PDF) en fichier MuseScore" Manufacturer="Vincent L." />
+
+    <MajorUpgrade DowngradeErrorMessage="Une version plus récente de [ProductName] est déjà installée." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Partition2MuseScore" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="ApplicationShortcut" Guid="e65c08c3-21fd-47ca-be57-eb8ab9dad4ba">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Partition2MuseScore"
+                  Description="Convertir une partition en fichier MuseScore"
+                  Target="[INSTALLFOLDER]Partition2MuseScore.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="CleanUpShortcutDir" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\Partition2MuseScore" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!--
+      Harvest direct du dossier publié (publish self-contained single-file) : pas de heat.exe à
+      maintenir, le contenu réel (juste l'exe, le single-file embarque le runtime .NET et les
+      libs natives) est repris tel quel. Les .pdb (symboles de debug) ne sont pas installés.
+    -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" Directory="INSTALLFOLDER">
+        <Exclude Files="$(var.PublishDir)\*.pdb" />
+      </Files>
+    </ComponentGroup>
+
+    <Feature Id="Main" Title="Partition2MuseScore" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="ApplicationShortcut" />
+    </Feature>
+  </Package>
+</Wix>

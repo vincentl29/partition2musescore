@@ -57,6 +57,16 @@ Un de ces deux outils compromis ou trafiqué sur la machine de l'utilisateur
 s'exécutera avec les mêmes privilèges que l'appli ; partition2musescore ne
 vérifie pas leur intégrité (signature, somme de contrôle) avant de les lancer.
 
+**Élévation de privilèges via winget** : si Audiveris/MuseScore sont absents
+ou obsolètes, l'appli lance un processus PowerShell **élevé** (invite UAC) qui
+exécute `winget install`/`winget upgrade --silent` pour le(s) paquet(s)
+concerné(s) (`audiveris.org.Audiveris` / `Musescore.Musescore`). L'appli
+elle-même ne télécharge ni n'installe jamais rien directement — elle délègue
+entièrement à `winget`, le gestionnaire de paquets officiel de Windows — mais
+cela reste une élévation de privilèges déclenchée automatiquement au
+démarrage ; un utilisateur qui refuse l'invite UAC continue simplement avec la
+version actuellement installée (ou sans l'outil, s'il est absent).
+
 **Construction de la ligne de commande** : les chemins de fichiers
 (source, dossier de travail temporaire, destination) sont actuellement
 insérés par interpolation de chaîne dans les arguments passés à
@@ -72,10 +82,29 @@ puis concaténation), ce qui limite le risque de traversée de répertoire
 (`../`) — mais toute évolution qui réintroduirait une concaténation de chemin
 à partir d'une chaîne non validée devrait être examinée avec attention.
 
+**Appel réseau sortant** : au démarrage, l'application interroge l'API
+publique GitHub (`api.github.com`, HTTPS) pour connaître la dernière version
+publiée d'Audiveris et de MuseScore, à titre informatif uniquement — aucun
+binaire n'est téléchargé ni exécuté à partir de cette réponse. La dernière
+version connue est mise en cache localement
+(`%LOCALAPPDATA%\Partition2MuseScore\version_cache.json`) ; un échec de cette
+requête (pas de connexion) n'empêche pas la conversion de fonctionner.
+
 **Fichiers `.mscz` générés** : ce sont des archives zip contenant du XML,
 produites entièrement par `MuseScore4.exe` — partition2musescore ne génère
 lui-même que le MusicXML intermédiaire (fusion des mouvements détectés par
 Audiveris), jamais directement le zip `.mscz`.
+
+**Installateur `Setup.msi`** : généré par `scripts/build-installer.ps1` (publication
+self-contained + `wix build`), il installe l'application par-machine (Program
+Files), ce qui nécessite une élévation à l'installation comme à la
+désinstallation — comportement standard pour tout `.msi` par-machine, sans
+spécificité supplémentaire de partition2musescore. L'installation
+d'Audiveris/MuseScore eux-mêmes n'est volontairement **pas** réalisée par une
+custom action du `.msi` (voir `CLAUDE.md`) : elle est déléguée à l'appli au
+premier lancement (paragraphe ci-dessus), dans le contexte utilisateur
+interactif plutôt que sous le compte SYSTEM qu'utilisent les actions
+différées d'un `.msi` élevé.
 
 ## Bonnes pratiques recommandées
 

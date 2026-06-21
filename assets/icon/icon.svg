@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4338CA"/>
+      <stop offset="55%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#9333EA"/>
+    </linearGradient>
+    <clipPath id="squircle">
+      <rect x="64" y="64" width="896" height="896" rx="180" ry="180"/>
+    </clipPath>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="180" ry="180" fill="url(#bg)"/>
+
+  <g clip-path="url(#squircle)">
+    <!-- page-fold corner, hints at scanned document input -->
+    <polygon points="780,64 960,64 960,244" fill="#ffffff" opacity="0.10"/>
+    <polygon points="780,64 960,244 800,244" fill="#ffffff" opacity="0.06"/>
+
+    <!-- faint staff lines behind the note -->
+    <g stroke="#ffffff" stroke-width="10" opacity="0.28">
+      <line x1="150" y1="470" x2="874" y2="470"/>
+      <line x1="150" y1="540" x2="874" y2="540"/>
+      <line x1="150" y1="610" x2="874" y2="610"/>
+      <line x1="150" y1="680" x2="874" y2="680"/>
+      <line x1="150" y1="750" x2="874" y2="750"/>
+    </g>
+  </g>
+
+  <!-- eighth note -->
+  <g fill="#ffffff">
+    <rect x="498" y="260" width="34" height="430" rx="6"/>
+    <path d="M 532 260
+             C 660 300, 700 390, 612 470
+             C 660 400, 630 330, 532 300
+             Z"/>
+    <ellipse cx="430" cy="710" rx="98" ry="74" transform="rotate(-18 430 710)"/>
+  </g>
+</svg>
