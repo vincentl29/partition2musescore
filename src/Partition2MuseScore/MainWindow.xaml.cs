@@ -123,16 +123,24 @@ public partial class MainWindow : Window
     private async Task ApplyToolActionsAsync(
         Dictionary<string, (ToolUpdater.ToolAction Action, ToolVersionChecker.VersionInfo Info)> actions)
     {
+        var spinnerTimers = new Dictionary<string, DispatcherTimer>();
         foreach (var (name, (action, _)) in actions)
         {
             var suffix = action == ToolUpdater.ToolAction.Install ? " — installation en cours..." : " — mise à jour en cours...";
             GetVersionTextBlock(name).Text += suffix;
+
+            var spinnerGlyph = GetSpinnerTextBlock(name);
+            spinnerGlyph.Visibility = Visibility.Visible;
+            spinnerTimers[name] = StartGlyphSpinner(spinnerGlyph);
         }
 
         var results = await ToolUpdater.TryApplyAsync(actions.ToDictionary(kv => kv.Key, kv => kv.Value.Action));
 
         foreach (var (name, (action, info)) in actions)
         {
+            StopGlyphSpinner(spinnerTimers[name]);
+            GetSpinnerTextBlock(name).Visibility = Visibility.Collapsed;
+
             var failureSuffix = action == ToolUpdater.ToolAction.Install
                 ? " (installation automatique indisponible)"
                 : " (mise à jour automatique indisponible)";
@@ -147,6 +155,13 @@ public partial class MainWindow : Window
     {
         "Audiveris" => AudiverisVersionText,
         "MuseScore" => MuseScoreVersionText,
+        _ => throw new ArgumentOutOfRangeException(nameof(toolName)),
+    };
+
+    private TextBlock GetSpinnerTextBlock(string toolName) => toolName switch
+    {
+        "Audiveris" => AudiverisSpinnerGlyph,
+        "MuseScore" => MuseScoreSpinnerGlyph,
         _ => throw new ArgumentOutOfRangeException(nameof(toolName)),
     };
 

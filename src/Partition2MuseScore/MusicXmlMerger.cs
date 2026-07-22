@@ -140,6 +140,24 @@ internal static class MusicXmlMerger
         }
     }
 
+    // Supprime du document MusicXML tous les éléments <direction> contenant un <wedge>
+    // (crescendo/decrescendo). Audiveris peut produire des wedges sans timeOffset résolu quand
+    // une mesure est marquée "no correct rhythm" — son propre exporteur (PartwiseBuilder) plante
+    // alors sur un tri null et laisse des données partielles dans le .mxl, ce qui fait rejeter
+    // le fichier par MuseScore (code 1320). Perdre les nuances est préférable à un export raté.
+    // Retourne le nombre d'éléments supprimés pour traçabilité dans les logs.
+    public static int SanitizeWedges(XDocument doc)
+    {
+        var toRemove = doc.Descendants("direction")
+            .Where(d => d.Descendants("wedge").Any())
+            .ToList();
+        foreach (var dir in toRemove)
+        {
+            dir.Remove();
+        }
+        return toRemove.Count;
+    }
+
     // Reconnaît une partie vocale via le signal le plus fiable observé empiriquement chez
     // Audiveris : il assigne toujours le patch GM "Voice Oohs" (programme 54) à une portée
     // qu'il a identifiée comme un chant, indépendamment du nom OCR ("S.", "A.", "Voice"...).

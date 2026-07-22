@@ -44,8 +44,20 @@
 
         <Label Grid.Row="5" Grid.Column="0" Content="Versions détectées :" VerticalAlignment="Center"/>
         <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Vertical" Margin="6,4" VerticalAlignment="Center">
-            <TextBlock x:Name="AudiverisVersionText" Text="Audiveris : vérification..." FontSize="11"/>
-            <TextBlock x:Name="MuseScoreVersionText" Text="MuseScore : vérification..." FontSize="11"/>
+            <!-- Glyphe spinner par outil (cf. MainWindow.xaml.cs StartGlyphSpinner) : masqué au
+                 repos, affiché et animé pendant une installation/mise à jour winget en arrière-plan
+                 (cf. ApplyToolActionsAsync), pour donner un retour visuel que ça avance vraiment
+                 (auparavant, seul un texte statique "... en cours" l'indiquait). -->
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="AudiverisVersionText" Text="Audiveris : vérification..." FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock x:Name="AudiverisSpinnerGlyph" Text="♪" FontSize="11" Margin="6,0,0,0"
+                           VerticalAlignment="Center" Visibility="Collapsed"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="MuseScoreVersionText" Text="MuseScore : vérification..." FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock x:Name="MuseScoreSpinnerGlyph" Text="♪" FontSize="11" Margin="6,0,0,0"
+                           VerticalAlignment="Center" Visibility="Collapsed"/>
+            </StackPanel>
         </StackPanel>
 
         <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,16,0,0" VerticalAlignment="Center">

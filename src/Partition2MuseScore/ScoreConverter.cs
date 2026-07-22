@@ -124,11 +124,46 @@ internal static class ScoreConverter
 
             var mergedScore = MusicXmlMerger.Merge(mxlPaths);
 
+            var removedWedges = MusicXmlMerger.SanitizeWedges(mergedScore);
+            if (removedWedges > 0)
+            {
+                capturedLog.Add($"[Partition2MuseScore] Nettoyage préventif : {removedWedges} crescendo/decrescendo supprimé(s) " +
+                                "(Audiveris a signalé des erreurs rythmiques sur ces mesures — ces éléments peuvent rendre le MusicXML invalide pour MuseScore).");
+            }
+
             var musicXmlPath = Path.Combine(workDir, "merged.musicxml");
             mergedScore.Save(musicXmlPath);
 
             progress.Report(new ConversionProgress(95, "Export vers MuseScore 4"));
-            await RunMuseScoreExportAsync(museScoreExe, musicXmlPath, outputPath, options.StylePath, capturedLog, activeProcesses);
+            try
+            {
+                await RunMuseScoreExportAsync(museScoreExe, musicXmlPath, outputPath, options.StylePath, capturedLog, activeProcesses);
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("1320"))
+            {
+                var omrGuidance = options.KeepOmr
+                    ? "Le projet Audiveris (.omr) a été conservé à côté du fichier de sortie.\n\n" +
+                      "Pour corriger :\n" +
+                      "1. Ouvrez ce .omr dans Audiveris.\n" +
+                      "2. Cherchez les mesures signalées « Voice too long » ou « no correct rhythm » dans les logs " +
+                      "(voir fichier journal) et supprimez-y les éléments mal reconnus " +
+                      "(crescendos, liaisons, têtes de notes erronées).\n" +
+                      "3. Dans cette application, choisissez le .omr corrigé comme source et relancez la conversion."
+                    : "Pour corriger :\n" +
+                      "1. Cochez « Conserver le projet Audiveris (.omr) » et relancez la conversion.\n" +
+                      "2. Ouvrez le .omr produit dans Audiveris.\n" +
+                      "3. Cherchez les mesures signalées « Voice too long » ou « no correct rhythm » dans les logs " +
+                      "(voir fichier journal) et supprimez-y les éléments mal reconnus " +
+                      "(crescendos, liaisons, têtes de notes erronées).\n" +
+                      "4. Dans cette application, choisissez le .omr corrigé comme source et relancez.";
+
+                throw new InvalidOperationException(
+                    "MuseScore 4 n'a pas pu lire le fichier MusicXML généré (code 1320).\n\n" +
+                    "Cause probable : Audiveris a détecté des erreurs rythmiques dans certaines mesures " +
+                    "(notes dont la durée dépasse la mesure, crescendos/decrescendos non résolus). " +
+                    "Ces éléments ont été nettoyés automatiquement, mais des incohérences subsistent.\n\n" +
+                    omrGuidance, ex);
+            }
 
             progress.Report(new ConversionProgress(100, "Terminé"));
         }

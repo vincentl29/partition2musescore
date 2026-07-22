@@ -20,7 +20,8 @@ Convertit une partition scannée ou photographiée (PDF ou image) en fichier Mus
 - **Détection automatique** des installations d'Audiveris et MuseScore 4 (registre Windows), quel que soit le disque d'installation.
 - **Affichage des versions, installation et mise à jour automatiques** : au démarrage, la version installée de chaque outil (registre Windows) et la dernière version disponible (dépôts GitHub officiels) sont affichées côte à côte ; la dernière version connue est mise en cache localement pour rester affichée même sans connexion internet. Si l'un des deux outils est absent (par exemple juste après l'installation du `Setup.msi`, sur un PC neuf) ou a du retard, une installation/mise à jour silencieuse via `winget` est lancée en arrière-plan (une seule invite UAC même si les deux outils sont concernés) ; l'application ne télécharge ni n'installe jamais rien elle-même, tout passe par winget.
 - **Barre de progression réelle**, basée sur les logs d'Audiveris (étape et page en cours), pas une animation.
-- **Journal d'erreur** écrit automatiquement à côté de la destination si la conversion échoue ; nouvel essai automatique en cas d'échec ponctuel de l'export MuseScore.
+- **Nettoyage préventif du MusicXML** : avant de passer le fichier à MuseScore, les crescendos/decrescendos (`<wedge>`) que Audiveris n'a pas pu positionner (mesures marquées « no correct rhythm ») sont supprimés automatiquement — ces données incomplètes feraient rejeter le fichier par MuseScore. Les nuances perdues peuvent être rajoutées manuellement dans MuseScore.
+- **Journal d'erreur** écrit automatiquement à côté de la destination si la conversion échoue ; nouvel essai automatique en cas d'échec ponctuel de l'export MuseScore. En cas d'erreur 1320 persistante, un message guidé indique comment corriger le projet Audiveris (`.omr`) à la main.
 - **Arrêt propre** des process Audiveris/MuseScore 4 en cours si la fenêtre est fermée pendant une conversion.
 
 ---
@@ -85,8 +86,10 @@ En cas d'échec, un fichier `<destination>_erreur_<horodatage>.log` est créé �
 Image/PDF
    │
    ▼
-Prétraitement (image uniquement)       — niveaux de gris, redressement,
+Prétraitement                          — image : niveaux de gris, redressement,
    │                                      débruitage, net renforcé (Magick.NET)
+   │                                    PDF : rendu page par page à 300 DPI,
+   │                                      niveaux de gris, réassemblage PDF
    ▼
 Audiveris CLI (-batch -export)        — reconnaissance optique de musique
    │  → un .mxl (MusicXML) par "mouvement" détecté
@@ -95,6 +98,10 @@ Fusion des mouvements                  — association des parties par nom,
    │                                      mesures de silence pour les parties
    │                                      absentes d'un mouvement, voix
    │                                      replacées au-dessus des instruments
+   ▼
+Nettoyage MusicXML                     — suppression des crescendos/decrescendos
+   │                                      sans position résolue (bug Audiveris
+   │                                      sur mesures à rythme non reconnu)
    ▼
 MuseScore 4 CLI (-o sortie.mscz)       — export final
    │
@@ -113,6 +120,7 @@ Héritées du moteur Audiveris (voir [memory/audiveris_handbook_reference.md](me
 - Hampes opposées très proches : peuvent être fusionnées en une seule, correction manuelle parfois nécessaire.
 - Tuplets : seuls triolets et sextolets sont reconnus.
 - Qualité de numérisation recommandée : niveaux de gris, 300 DPI (400 pour petits symboles), sans rotation/voilure.
+- Crescendos/decrescendos : quand Audiveris signale des erreurs rythmiques sur des mesures (« Voice too long », « no correct rhythm »), les nuances dynamiques associées sont supprimées automatiquement du MusicXML avant l'export (bug Audiveris — données de position `null`). Elles peuvent être rajoutées manuellement dans MuseScore. Si l'export échoue quand même (code 1320), utiliser le `.omr` pour corriger dans Audiveris (un message guidé explique la marche à suivre).
 
 ---
 

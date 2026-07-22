@@ -7,6 +7,43 @@ et le projet vise le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-06-29
+
+### Fixed
+- Nettoyage préventif des `<wedge>` (crescendo/decrescendo) dans le MusicXML
+  fusionné avant export vers MuseScore : Audiveris peut produire des éléments
+  `<wedge>` sans `timeOffset` résolu quand certaines mesures sont marquées
+  « no correct rhythm » — son propre exporteur plante alors sur un tri null et
+  laisse des données partielles, ce qui fait rejeter le fichier par MuseScore
+  (code 1320). Les nuances sont perdues mais la conversion aboutit ; elles
+  peuvent être rajoutées manuellement dans MuseScore.
+- En cas d'échec MuseScore persistant (code 1320) malgré ce nettoyage, le
+  message d'erreur guide désormais l'utilisateur en français pour corriger le
+  projet Audiveris (.omr) à la main : marche à suivre adaptée selon que l'option
+  « Conserver le projet Audiveris (.omr) » était cochée ou non.
+
+## [1.1.0] - 2026-06-22
+
+### Added
+- Le `Setup.msi` détecte désormais une installation existante de Partition2MuseScore
+  et distingue mise à jour (version installée plus ancienne) et réinstallation
+  (version identique), avec un dialogue dédié l'indiquant avant que l'ancienne
+  installation ne soit remplacée (jamais affiché en silencieux `/quiet`, ni sur une
+  première installation). `AllowSameVersionUpgrades="yes"` corrige par ailleurs un
+  vrai défaut : sans cette option, relancer le `Setup.msi` d'une version identique
+  à celle déjà installée créait une 2e entrée dans Ajout/Suppression de programmes
+  (`ProductCode="*"` génère un GUID neuf à chaque build) au lieu de remplacer
+  proprement l'installation existante.
+
+## [1.0.1] - 2026-06-22
+
+### Added
+- Spinner notes/binaire également visible sur la ligne « Versions détectées »
+  pendant une installation/mise à jour winget d'Audiveris ou MuseScore en
+  arrière-plan — jusqu'ici, seul un texte statique « ... en cours »
+  l'indiquait dans ce cas (l'écran de premier lancement bloquant, lui,
+  avait déjà son propre spinner).
+
 ## [1.0.0] - 2026-06-21
 
 ### Added

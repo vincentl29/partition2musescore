@@ -15,8 +15,29 @@
 
     <SummaryInformation Description="Convertit une partition (image/PDF) en fichier MuseScore" Manufacturer="Vincent L." />
 
-    <MajorUpgrade DowngradeErrorMessage="Une version plus récente de [ProductName] est déjà installée." />
+    <!--
+      AllowSameVersionUpgrades="yes" : sans ça, relancer le Setup.msi d'une version IDENTIQUE
+      à celle déjà installée ne déclenche pas RemoveExistingProducts (la plage de versions que
+      MajorUpgrade détecte par défaut exclut l'égalité), or avec ProductCode="*" (un GUID neuf à
+      chaque build), ça créerait une 2e entrée dans Ajout/Suppression de programmes au lieu de
+      remplacer proprement l'installation existante. Avec cette option, une version identique
+      est traitée comme les autres : désinstallation de l'ancienne puis installation de la
+      nouvelle (RemoveExistingProducts), exactement comme une vraie mise à jour.
+    -->
+    <MajorUpgrade
+        DowngradeErrorMessage="Une version plus récente de [ProductName] est déjà installée."
+        AllowSameVersionUpgrades="yes" />
     <MediaTemplate EmbedCab="yes" />
+
+    <!--
+      Relit (AppSearch, avant tout le reste) la version installée par le Setup.msi précédent,
+      enregistrée ci-dessous par le composant ApplicationShortcut. Comparée à $(var.AppVersion)
+      dans UpgradeNoticeDlg (cf. <UI> ci-dessous), elle distingue une mise à jour (version
+      trouvée plus ancienne) d'une réinstallation (version identique).
+    -->
+    <Property Id="PREVIOUSVERSION">
+      <RegistrySearch Id="PreviousVersionSearch" Root="HKCU" Key="Software\Partition2MuseScore" Name="Version" Type="raw" />
+    </Property>
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="Partition2MuseScore" />
@@ -31,6 +52,7 @@
                   WorkingDirectory="INSTALLFOLDER" />
         <RemoveFolder Id="CleanUpShortcutDir" On="uninstall" />
         <RegistryValue Root="HKCU" Key="Software\Partition2MuseScore" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Partition2MuseScore" Name="Version" Type="string" Value="$(var.AppVersion)" />
       </Component>
     </StandardDirectory>
 
@@ -49,5 +71,37 @@
       <ComponentGroupRef Id="AppFiles" />
       <ComponentRef Id="ApplicationShortcut" />
     </Feature>
+
+    <!--
+      Seul dialogue de cet installeur (volontairement minimal, pas de wizard Bienvenue/
+      Licence/Fin, voir memory/installer_msi_setup.md) : averti l'utilisateur, avant que
+      RemoveExistingProducts ne s'exécute, qu'une installation existante a été détectée et
+      précise s'il s'agit d'une mise à jour (version antérieure trouvée via PREVIOUSVERSION)
+      ou d'une réinstallation (version identique). N'apparaît jamais sur une installation
+      silencieuse (/quiet) ni sur une première installation (WIX_UPGRADE_DETECTED n'est posée
+      par MajorUpgrade que si une installation correspondant à l'UpgradeCode est trouvée).
+    -->
+    <UI>
+      <Dialog Id="UpgradeNoticeDlg" Width="320" Height="140" Title="Partition2MuseScore">
+        <Control Id="UpdateText" Type="Text" X="20" Y="20" Width="280" Height="50"
+                 ShowCondition="NOT (PREVIOUSVERSION = &quot;$(var.AppVersion)&quot;)"
+                 HideCondition="PREVIOUSVERSION = &quot;$(var.AppVersion)&quot;"
+                 Text="Une version antérieure de Partition2MuseScore est installée : elle va être mise à jour vers la version $(var.AppVersion)." />
+        <Control Id="ReinstallText" Type="Text" X="20" Y="20" Width="280" Height="50"
+                 ShowCondition="PREVIOUSVERSION = &quot;$(var.AppVersion)&quot;"
+                 HideCondition="NOT (PREVIOUSVERSION = &quot;$(var.AppVersion)&quot;)"
+                 Text="Partition2MuseScore (version $(var.AppVersion)) est déjà installé : il va être réinstallé." />
+        <Control Id="CancelButton" Type="PushButton" X="170" Y="100" Width="60" Height="20" Cancel="yes" Text="Annuler">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+        <Control Id="OkButton" Type="PushButton" X="240" Y="100" Width="60" Height="20" Default="yes" Text="Continuer">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+      </Dialog>
+
+      <InstallUISequence>
+        <Show Dialog="UpgradeNoticeDlg" Before="ExecuteAction" Condition="WIX_UPGRADE_DETECTED" />
+      </InstallUISequence>
+    </UI>
   </Package>
 </Wix>
