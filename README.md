@@ -109,13 +109,11 @@ MuseScore 4 CLI (-o sortie.mscz)       — export final
 .mscz
 ```
 
-Voir [`CLAUDE.md`](CLAUDE.md) pour le détail technique de chaque étape.
-
 ---
 
 ## Limitations connues
 
-Héritées du moteur Audiveris (voir [memory/audiveris_handbook_reference.md](memory/audiveris_handbook_reference.md)) :
+Héritées du moteur Audiveris :
 
 - Hampes opposées très proches : peuvent être fusionnées en une seule, correction manuelle parfois nécessaire.
 - Tuplets : seuls triolets et sextolets sont reconnus.
@@ -138,7 +136,7 @@ Pour générer l'installateur (`Setup.msi`) :
 pwsh scripts/build-installer.ps1
 ```
 
-Nécessite le CLI WiX v5 (`dotnet tool install --global wix --version 5.0.2`) — volontairement pas v6/v7, qui imposent l'acceptation d'une licence "Open Source Maintenance Fee" avant de pouvoir construire quoi que ce soit. Voir [`CLAUDE.md`](CLAUDE.md), section "Installateur Windows (Setup.msi)".
+Nécessite le CLI WiX v5 (`dotnet tool install --global wix --version 5.0.2`) — volontairement pas v6/v7, qui imposent l'acceptation d'une licence "Open Source Maintenance Fee" avant de pouvoir construire quoi que ce soit.
 
 Pour régénérer l'icône de l'application (`Resources/app.ico`) après modification de `assets/icon/icon.svg` :
 
@@ -146,7 +144,7 @@ Pour régénérer l'icône de l'application (`Resources/app.ico`) après modific
 python assets/icon/generate_ico.py
 ```
 
-Nécessite Inkscape. Voir [`CLAUDE.md`](CLAUDE.md), section "Icône de l'application".
+Nécessite Inkscape.
 
 ## Licence
 

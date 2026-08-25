@@ -101,7 +101,7 @@ Files), ce qui nécessite une élévation à l'installation comme à la
 désinstallation — comportement standard pour tout `.msi` par-machine, sans
 spécificité supplémentaire de partition2musescore. L'installation
 d'Audiveris/MuseScore eux-mêmes n'est volontairement **pas** réalisée par une
-custom action du `.msi` (voir `CLAUDE.md`) : elle est déléguée à l'appli au
+custom action du `.msi` : elle est déléguée à l'appli au
 premier lancement (paragraphe ci-dessus), dans le contexte utilisateur
 interactif plutôt que sous le compte SYSTEM qu'utilisent les actions
 différées d'un `.msi` élevé.

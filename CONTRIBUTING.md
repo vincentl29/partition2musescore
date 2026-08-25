@@ -15,7 +15,7 @@ code dans `src/Partition2MuseScore/`. `MainWindow.xaml.cs` ne contient que les
 handlers UI ; le pipeline de conversion (image/PDF → Audiveris → fusion
 MusicXML → MuseScore 4 CLI → `.mscz`) est implémenté dans des classes dédiées
 (`ScoreConverter`, `MusicXmlMerger`, `ToolLocator`, `ToolVersionChecker`,
-`ProcessRunner`) ; voir `CLAUDE.md` pour le détail de ce qui est fait.
+`ProcessRunner`).
 
 ## Lancer le projet
 
@@ -36,8 +36,8 @@ pwsh scripts/build-installer.ps1
 ```
 
 Nécessite en plus le CLI WiX v5 (`dotnet tool install --global wix --version 5.0.2`
-— pas v6/v7, voir `CLAUDE.md`). Voir [`CLAUDE.md`](CLAUDE.md), section
-« Installateur Windows (Setup.msi) », pour le détail.
+— volontairement pas v6/v7, qui imposent l'acceptation d'une licence
+« Open Source Maintenance Fee » avant de pouvoir construire quoi que ce soit).
 
 ## Tests et qualité
 
@@ -61,7 +61,7 @@ refactor: …      test: …      chore: …
 
 1. Créer une branche dédiée depuis la branche par défaut.
 2. `dotnet build Partition2MuseScore.slnx` sans avertissement (voir *Tests et qualité*).
-3. Si l'architecture change, **mettre à jour `CLAUDE.md` et `README.md`** en conséquence.
+3. Si l'architecture change, **mettre à jour `README.md`** en conséquence.
 4. Ajouter une entrée sous `## [Unreleased]` dans `CHANGELOG.md`.
 5. Décrire le *pourquoi* du changement dans la PR.
 
@@ -76,6 +76,5 @@ refactor: …      test: …      chore: …
 
 ## Repères d'architecture
 
-Voir [`CLAUDE.md`](./CLAUDE.md) — c'est la source de vérité pour la structure du
-code, les commandes et les décisions de conception au fur et à mesure qu'elles
-sont prises.
+Voir la section « Pipeline de conversion » du [`README.md`](README.md#pipeline-de-conversion)
+pour la structure du pipeline et le rôle de chaque classe sous `src/Partition2MuseScore/`.

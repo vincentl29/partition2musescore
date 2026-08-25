@@ -3,7 +3,7 @@
 CLAUDE.md
 AGENTS.md
 *.iml
-scripts/
+scripts/publish.ps1
 memory/
 
 # Documentation tierce (Audiveris) recopiée pour référence locale — pas republiée.
